@@ -1,0 +1,3 @@
+main_token = '13676fe2496f6fd4abde7e5fa93a654f4201be630d4c047530f5cd9b1194cd062167f6175cf79a44eeaa3'
+group_id = 139592783
+people_admin_id = 46688565
