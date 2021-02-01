@@ -4,7 +4,7 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import datetime
 from icecream import ic
 # В файле confidential_data содержатся ID Админа сообщества, токенсообщества и ID группы
-from confidential_data import *
+from confidential_Data import *
 
 
 
