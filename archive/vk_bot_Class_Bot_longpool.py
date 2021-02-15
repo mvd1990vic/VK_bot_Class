@@ -4,8 +4,7 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import datetime
 from icecream import ic
 # В файле confidential_data содержатся ID Админа сообщества, токенсообщества и ID группы
-from confidential_Data import *
-
+from settings import MAIN_TOKEN, GROUP_ID, PEOPLE_ADMIN_ID
 
 
 class BotAll:
@@ -26,9 +25,9 @@ class BotAll:
         print('Работа бота началась!')
 
         for event in self.longpool.listen():
-            self.on_event(self, event)
+            self.on_event(event)
 
-    def on_event(self, pre_event, event):
+    def on_event(self, event):
 
         if event.type == VkBotEventType.MESSAGE_NEW:
             ic(event)
@@ -93,8 +92,6 @@ class BotClient(BotAll):
                                           user_id=self.peer_id)
 
 
-
-
 class BotAdmin(BotAll):
     '''Бот ответственный за работу с админами'''
 
@@ -141,7 +138,7 @@ dialog_url = 'vk.com/gim139592783?sel='
 # group_id =
 # people_admin_id =
 
-bot_piano_client = BotClient(main_token=main_token, group_id=group_id)
-bot_piano_admin = BotAdmin(main_token=main_token, admin_id=people_admin_id, dialog_url=dialog_url, group_id=group_id)
+bot_piano_client = BotClient(main_token=MAIN_TOKEN, group_id=GROUP_ID)
+bot_piano_admin = BotAdmin(main_token=MAIN_TOKEN, admin_id=PEOPLE_ADMIN_ID, dialog_url=dialog_url, group_id=GROUP_ID)
 
 bot_piano_client.run_bot()
