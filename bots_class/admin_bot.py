@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 
-from Bots_class.parrent_bot import Bot
+from bots_class.parrent_bot import Bot
 
 
 class AdminBot(Bot):

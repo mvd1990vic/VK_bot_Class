@@ -19,10 +19,15 @@ class Bot:
     def run(self):
         """
         Запуск бесконечного мониторинга событий сообщества.
-        Если событие == НОВОЕ СООБЩЕНИЕ - запуск метода бота клиента.
+        Если состоялось событие, то вызываем метод on_event из дочернего класса client_bot.
+        Так же вызов on_event обвёрнут в try/except что бы работа бота не прикращалась.
         """
         print('Работа бота началась:')
 
         for event in self.longpool.listen():
-            if event.type == VkBotEventType.MESSAGE_NEW:
-                ic(event)
+            try:
+                self.on_event(event)
+            except Exception as exc:
+                print('Ошибка в обработке: ', exc )
+
+
