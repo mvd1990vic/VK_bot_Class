@@ -5,6 +5,7 @@ from vk_api.bot_longpoll import VkBotEventType
 
 from bots_class.parrent_bot import Bot
 from databases.user_db import UserState
+from settings import INTENTS
 
 
 class ClientBot(Bot):
@@ -41,3 +42,27 @@ class ClientBot(Bot):
         @return:
         """
         ic(state_user)
+        if state_user:
+            # continue scenario
+            self.continue_scenario(event=event, state_user=state_user)
+        else:
+            # search intent
+            text = event.text
+            if event.attachments:
+                attachments = event.attachments[0]
+            else:
+                attachments = ''
+            ic(attachments)
+            for intent in INTENTS:
+            # Find token in INTENTS
+                if any (token in text.lower() for token in intent['tokens']) or \
+                   any (token in attachments for token in intent['tokens'] ):
+                    pass
+
+
+
+
+
+    def continue_scenario(self, event, state_user):
+        """Продолжение сценария, если в таблице действующих сценариев присутствует id полльзователя"""
+        pass
