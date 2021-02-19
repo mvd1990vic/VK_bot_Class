@@ -28,6 +28,9 @@ class Bot:
             try:
                 self.on_event(event)
             except Exception as exc:
-                print('Ошибка в обработке: ', exc )
+               print('Ошибка в обработке: ', exc )
 
-
+    def send_message(self, user_id, text, sticker_id=None, attachment=None):
+        """Отправка сообщений от бота"""
+        self.vk.messages.send(user_id=user_id, message=text, sticker_id=sticker_id, attachment=attachment,
+                              random_id=0)
