@@ -3,6 +3,7 @@ from icecream import ic
 from pony.orm import db_session
 from vk_api.bot_longpoll import VkBotEventType
 
+from bots_class import handlers
 from bots_class.parrent_bot import Bot
 from databases.user_db import UserState
 from settings import INTENTS, SCENARIOS
@@ -26,13 +27,12 @@ class ClientBot(Bot):
         @return:
         """
         if event.type != VkBotEventType.MESSAGE_NEW:
-           return
+            return
         print('Пользователь написал сообщение')
         ic(event.message)
         user_id = event.message.peer_id
-        state = UserState.get(user_id=str(user_id)) # получение состояния пользователя в сценарии.
+        state = UserState.get(user_id=str(user_id))  # получение состояния пользователя в сценарии.
         self._message_handler(event=event.message, state_user=state)
-
 
     def _message_handler(self, event, state_user):
         """
@@ -46,6 +46,8 @@ class ClientBot(Bot):
         if state_user:
             # continue scenario
             self.continue_scenario(event=event, state_user=state_user)
+            text_to_send = "Запущен сценарий продолжения"
+            print(text_to_send)
         else:
             # search intent
             text = event.text
@@ -54,9 +56,9 @@ class ClientBot(Bot):
             else:
                 attachments = ''
             for intent in INTENTS:
-            # Find token in INTENTS
-                if any (token in attachments for token in intent['tokens'] ) or \
-                   any (token in text.lower() for token in intent['tokens']) and attachments == '':
+                # Find token in INTENTS
+                if any(token in attachments for token in intent['tokens']) or \
+                        any(token in text.lower() for token in intent['tokens']) and attachments == '':
                     if intent['answer']:
                         text_to_send = intent['answer']
                         print('Запущен ответ')
@@ -72,26 +74,18 @@ class ClientBot(Bot):
         """Запуск обработки сценария"""
         # TODO Нужно подумать как сделать рефакторинг добавления значений в СЛВАРЬ context, что бы работало для разных сценариев
         context = {}
-        context['sheets'] = []
-        context['price'] = 0
-        user_id = event.peer_id
-        price = int(int(event.attachments[0]['market']['price']['amount'])/100)
-        sheet = event.attachments[0]['market']['title']
-        ic(price)
         scenario = SCENARIOS[scenario_name]
         first_step = scenario['first_step']
         step = scenario['steps'][first_step]
+        for handler in step['handler']:
+            handler = getattr(handlers, handler)
+            handler(event=event, context=context)
+
+        user_id = event.peer_id
         text_to_send = step['text']
-
-        context['sheets'].append(sheet)
-        context['price'] += price
-
 
         UserState(user_id=str(user_id), scenario_name=scenario_name, step_name=first_step, context=context)
         return text_to_send
-
-
-
 
     def continue_scenario(self, event, state_user):
         """Продолжение сценария, если в таблице действующих сценариев присутствует id полльзователя"""

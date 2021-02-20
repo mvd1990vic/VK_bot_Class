@@ -25,10 +25,10 @@ class Bot:
         print('Работа бота началась:')
 
         for event in self.longpool.listen():
-            try:
+            #try:
                 self.on_event(event)
-            except Exception as exc:
-               print('Ошибка в обработке: ', exc )
+            #except Exception as exc:
+            #   print('Ошибка в обработке: ', exc )
 
     def send_message(self, user_id, text, sticker_id=None, attachment=None):
         """Отправка сообщений от бота"""

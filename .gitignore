@@ -1,4 +1,4 @@
 /venv/
 /.idea/
-/settings.py
 /databases/bot.db
+/private_settings.py
