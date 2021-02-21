@@ -17,11 +17,19 @@ INTENTS = [
 ]
 
 SCENARIOS = {
-    'market':{
+    'market': {
         'first_step': 'step1',
-        'steps':{
-            'step1':{
-                'text':'Запущен сценарий маркета',
+        'steps': {
+            'step1': {
+                'sticker_id': 21313,
+                'text': '''Доброго времени суток для оплаты можно воспользоваться моими реквизитами:
+        
+        Карта СБ
+        4276 8640 2995 5943
+        Саприна Мария Александровна
+        
+        Эти ноты стоят {price} ₽. Вы так же можете продолжить выбор товаров в каталоге маркета
+        После оплаты напишите об этом сюда, ну а лучше скиньте скрин квитанции.''',
                 'failure_text': None,
                 'handler': ['price', 'sheets'],
                 'next_step': None
@@ -33,7 +41,7 @@ SCENARIOS = {
 
 #Конфиг sqlite Базы данных
 DB_CONFIG = dict(
-provider='sqlite',
+    provider='sqlite',
     filename='bot.db',
     create_db=True,
 )

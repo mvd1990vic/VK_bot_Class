@@ -43,6 +43,7 @@ class ClientBot(Bot):
         """
         user_id = event.peer_id
         text_to_send = None
+        sticker_id = None
         if state_user:
             # continue scenario
             self.continue_scenario(event=event, state_user=state_user)
@@ -64,11 +65,11 @@ class ClientBot(Bot):
                         print('Запущен ответ')
 
                     else:
-                        text_to_send = self.start_scenario(event=event, scenario_name=intent['scenario'])
+                        text_to_send, sticker_id = self.start_scenario(event=event, scenario_name=intent['scenario'])
                         print('Запущен сценарий')
                     break
         ic(text_to_send)
-        self.send_message(user_id=user_id, text=text_to_send)
+        self.send_message(user_id=user_id, text=text_to_send, sticker_id=sticker_id)
 
     def start_scenario(self, event, scenario_name):
         """Запуск обработки сценария"""
@@ -82,10 +83,11 @@ class ClientBot(Bot):
             handler(event=event, context=context)
 
         user_id = event.peer_id
-        text_to_send = step['text']
+        text_to_send = (step['text'].format(**context))
+        sticker_id = step['sticker_id']
 
         UserState(user_id=str(user_id), scenario_name=scenario_name, step_name=first_step, context=context)
-        return text_to_send
+        return text_to_send, sticker_id
 
     def continue_scenario(self, event, state_user):
         """Продолжение сценария, если в таблице действующих сценариев присутствует id полльзователя"""

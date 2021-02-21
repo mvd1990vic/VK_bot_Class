@@ -25,12 +25,14 @@ class Bot:
         print('Работа бота началась:')
 
         for event in self.longpool.listen():
-            #try:
+            try:
                 self.on_event(event)
-            #except Exception as exc:
-            #   print('Ошибка в обработке: ', exc )
+            except Exception as exc:
+               print('Ошибка в обработке: ', exc )
 
     def send_message(self, user_id, text, sticker_id=None, attachment=None):
         """Отправка сообщений от бота"""
-        self.vk.messages.send(user_id=user_id, message=text, sticker_id=sticker_id, attachment=attachment,
-                              random_id=0)
+        self.vk.messages.send(user_id=user_id, message=text, attachment=attachment, random_id=0)
+        # Отправка стикера
+        if sticker_id:
+            self.vk.messages.send(user_id=user_id, sticker_id=sticker_id, random_id=0)
