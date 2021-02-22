@@ -45,10 +45,17 @@ class ClientBot(Bot):
         text_to_send = None
         sticker_id = None
         if state_user:
+            text = event.text
+            if event.attachments:
+                attachments = event.attachments[0]
+            else:
+                attachments = ''
+            for intent in INTENTS:
             # continue scenario
-            self.continue_scenario(event=event, state_user=state_user)
-            text_to_send = "Запущен сценарий продолжения"
-            print(text_to_send)
+                if any(token in attachments for token in intent['tokens']) or \
+                        any(token in text.lower() for token in intent['tokens']) and attachments == '':
+                    text_to_send, sticker_id = self.continue_scenario(event=event, state_user=state_user)
+                    print(text_to_send)
         else:
             # search intent
             text = event.text
@@ -69,11 +76,11 @@ class ClientBot(Bot):
                         print('Запущен сценарий')
                     break
         ic(text_to_send)
-        self.send_message(user_id=user_id, text=text_to_send, sticker_id=sticker_id)
+        if text_to_send or sticker_id:
+            self.send_message(user_id=user_id, text=text_to_send, sticker_id=sticker_id)
 
     def start_scenario(self, event, scenario_name):
         """Запуск обработки сценария"""
-        # TODO Нужно подумать как сделать рефакторинг добавления значений в СЛВАРЬ context, что бы работало для разных сценариев
         context = {}
         scenario = SCENARIOS[scenario_name]
         first_step = scenario['first_step']
@@ -81,6 +88,7 @@ class ClientBot(Bot):
         for handler in step['handler']:
             handler = getattr(handlers, handler)
             handler(event=event, context=context)
+
 
         user_id = event.peer_id
         text_to_send = (step['text'].format(**context))
@@ -90,5 +98,24 @@ class ClientBot(Bot):
         return text_to_send, sticker_id
 
     def continue_scenario(self, event, state_user):
-        """Продолжение сценария, если в таблице действующих сценариев присутствует id полльзователя"""
-        pass
+        """Продолжение сценария, если в таблице действующих сценариев присутствует id пользователя"""
+        steps = SCENARIOS[state_user.scenario_name]['steps']
+        step = steps[state_user.step_name]
+
+        for handler in step['handler']:
+            handler = getattr(handlers, handler)
+            handler(event=event, context=state_user.context)
+
+        next_step = steps[step['next_step']]
+        text_to_send = (next_step['text'].format(**state_user.context))
+        sticker_id = next_step['sticker_id']
+        if next_step['next_step']:
+            state_user.step_name = step['next_step']
+        else:
+            state_user.delete()
+            text_to_send = 'Конец сценария'
+
+
+        return text_to_send, sticker_id
+
+

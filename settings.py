@@ -1,5 +1,5 @@
 INTENTS = [
-{
+    {
         'name': 'Приветствие',
         'tokens': ('здравствуйте', 'привет', 'хай', 'здорова'),
         'scenario': None,
@@ -7,7 +7,7 @@ INTENTS = [
                   'Если хочешь приобрести ноты, то воспользуйся товарами в моём сообществе:\n'
                   'https://vk.com/market-69097195'
     },
-{
+    {
         'name': 'Вызов сценария маркета',
         'tokens': ('market', 'маркет'),
         'scenario': 'market',
@@ -32,14 +32,20 @@ SCENARIOS = {
         После оплаты напишите об этом сюда, ну а лучше скиньте скрин квитанции.''',
                 'failure_text': None,
                 'handler': ['price', 'sheets'],
-                'next_step': None
+                'next_step': 'step2'
+            },
+            'step2': {
+                'sticker_id': None,
+                'text': 'Ещё один тест Шаг 2',
+                'failure_text': None,
+                'handler': ['price', 'sheets'],
+                'next_step': 'step2'
             }
         }
     }
 }
 
-
-#Конфиг sqlite Базы данных
+# Конфиг sqlite Базы данных
 DB_CONFIG = dict(
     provider='sqlite',
     filename='bot.db',
