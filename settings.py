@@ -21,6 +21,8 @@ SCENARIOS = {
         'first_step': 'step1',
         'steps': {
             'step1': {
+                'admin_method': 'market_mark',
+                'message_to_admin': 'Пользователь {name_user} захотел ноты {sheet}',
                 'sticker_id': 21313,
                 'text': '''Доброго времени суток для оплаты можно воспользоваться моими реквизитами:
         
@@ -35,8 +37,10 @@ SCENARIOS = {
                 'next_step': 'step2'
             },
             'step2': {
+                'admin_method': 'market_mark',
+                'message_to_admin': 'Пользователь {name_user} захотел ноты {sheet}',
                 'sticker_id': None,
-                'text': 'Ещё один тест Шаг 2',
+                'text': 'Отлично эти ноты мы тоже зафиксировали. Итого к оплате поучается: {price} ₽',
                 'failure_text': None,
                 'handler': ['price', 'sheets'],
                 'next_step': 'step2'

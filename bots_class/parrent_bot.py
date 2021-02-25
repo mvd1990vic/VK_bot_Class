@@ -1,16 +1,19 @@
 #!/usr/local/bin/python
+import threading
+
 from icecream import ic
 from vk_api import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 
-class Bot:
+class Bot(threading.Thread):
     """
     Основная часть бота в ней проходит подключение к вк и определение метода отправки сообщения, т.к. это возможно
     и для клиента и для админа.
     """
 
-    def __init__(self, main_token, group_id):  # Инициализация бота
+    def __init__(self, main_token, group_id, *args, **kwargs):  # Инициализация бота
+        super(Bot, self).__init__(*args, **kwargs)
         self.group_id = group_id  # id группы передаётся из файла settings.py
         self.vk_session = vk_api.VkApi(token=main_token)  # Запуск ВК сессии при помощи токена API
         self.vk = self.vk_session.get_api()
@@ -36,3 +39,10 @@ class Bot:
         # Отправка стикера
         if sticker_id:
             self.vk.messages.send(user_id=user_id, sticker_id=sticker_id, random_id=0)
+
+
+    def get_name_user(self, event):
+        user_id = event.peer_id
+        user_name = self.vk.users.get(user_id=user_id)
+        fullname = user_name[0]['first_name'] + ' ' + user_name[0]['last_name']
+        return fullname, user_id
