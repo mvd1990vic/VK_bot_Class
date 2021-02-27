@@ -41,8 +41,65 @@ class Bot(threading.Thread):
             self.vk.messages.send(user_id=user_id, sticker_id=sticker_id, random_id=0)
 
 
-    def get_name_user(self, event):
-        user_id = event.peer_id
-        user_name = self.vk.users.get(user_id=user_id)
+
+
+class EventContentHandler:
+    """
+    Класс обработки содержимого события для облегчения чтения основных ботов.
+    """
+    def handler_content(self, get_content, event=None, vk=None, user_id=None):
+        """
+        @param event: Передаём событие целиком
+        @param get_content: по запросу переходим по методу
+        @param vk: для некоторых запросов нужны параметры ВК сессии
+        @return: возвращение обработанных данных
+        """
+
+        if get_content == 'fullname':
+            return self.get_name_user(event=event,vk=vk, user_id=user_id)
+        elif get_content == 'user_id':
+            return self.get_user_id(event=event)
+        elif get_content == 'product_number':
+            return self.get_product_number(event=event)
+        elif get_content == 'product_name':
+            return self.get_product_name(event=event)
+        elif get_content == 'photo_url':
+            return self.get_photo_url(event=event)
+        elif get_content == 'photo_number':
+            return self.get_photo_number(event=event)
+
+    def get_photo_url(self,event):
+        photo_url= event.attachments[0]['photo']['sizes'][3]['url']
+        return photo_url
+
+
+    def get_name_user(self,vk, event=None, user_id=None):
+        if user_id:
+            user_id = user_id
+
+        else:
+            user_id = event.peer_id
+
+
+
+        user_name = vk.users.get(user_id=user_id)
         fullname = user_name[0]['first_name'] + ' ' + user_name[0]['last_name']
-        return fullname, user_id
+        return fullname
+
+    def get_user_id(self, event):
+        user_id = event.peer_id
+        return user_id
+
+    def get_product_number(self,event):
+        product_number = ('market' + str(event.attachments[0]['market']['owner_id']) + '_' +
+                          str(event.attachments[0]['market']['id']))
+        return product_number
+
+    def get_photo_number(self,event):
+        photo_number = ('photo' + str(event.attachments[0]['photo']['owner_id']) + '_' +
+                     str(event.attachments[0]['photo']['id']) + '_' + str(event.attachments[0]['photo']['access_key']))
+        return photo_number
+
+    def get_product_name(self,event):
+        product_name = event.attachments[0]['market']['title']
+        return product_name

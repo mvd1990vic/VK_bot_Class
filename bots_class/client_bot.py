@@ -1,4 +1,6 @@
 #!/usr/local/bin/python
+import time
+
 from icecream import ic
 from pony.orm import db_session
 from vk_api.bot_longpoll import VkBotEventType
@@ -46,6 +48,10 @@ class ClientBot(Bot):
         user_id = event.peer_id
         text_to_send = None
         sticker_id = None
+        if event.attachments:
+            attachments = event.attachments[0]
+        else:
+            attachments = ''
         if state_user:
             text = event.text
             text_to_send, sticker_id, admin_method, message_to_admin = \
@@ -53,10 +59,7 @@ class ClientBot(Bot):
         else:
             # search intent
             text = event.text
-            if event.attachments:
-                attachments = event.attachments[0]
-            else:
-                attachments = ''
+
             for intent in INTENTS:
                 # Find token in INTENTS
                 if any(token in attachments for token in intent['tokens']) or \
@@ -71,6 +74,8 @@ class ClientBot(Bot):
                         print('Запущен сценарий')
                     break
         admin_bot.message_from_user(event)
+        if 'photo' in attachments:
+            admin_bot.photo_from_user(event)
         if text_to_send or sticker_id:
             self.send_message(user_id=user_id, text=text_to_send, sticker_id=sticker_id)
 
@@ -90,8 +95,19 @@ class ClientBot(Bot):
         sticker_id = step['sticker_id']
         admin_method = step['admin_method']
         message_to_admin = step['message_to_admin']
+        new_id = None
+        for i in range(1,50):
+            find_id = UserState.get(id=str(i))
+            if find_id:
+                pass
+            else:
+                new_id = i
+                break
 
-        UserState(user_id=str(user_id), scenario_name=scenario_name, step_name=first_step, context=context)
+
+        UserState(id=new_id, user_id=str(user_id), scenario_name=scenario_name,
+                  step_name=first_step, context=context)
+        admin_bot.product_from_user(event)
         return text_to_send, sticker_id, admin_method, message_to_admin
 
     def continue_scenario(self, event, state_user):
@@ -114,6 +130,7 @@ class ClientBot(Bot):
         else:
             attachments = ''
         if 'market' in attachments:
+            admin_bot.product_from_user(event)
             for handler in step['handler']:
                 handler = getattr(handlers, handler)
                 handler(event=event, context=state_user.context)
@@ -128,12 +145,17 @@ class ClientBot(Bot):
                 state_user.delete()
                 text_to_send = 'Конец сценария'
         elif 'photo' in attachments:
-            admin_bot.photo_from_user(event)
-
-            # TODO Подготовить отправку фото админу, а если сообщение было отправлено ночью, то сообщить об этом пользователю
-
-            text_to_send = None
-            sticker_id = None
+            time_message= event.date
+            local_time = time.gmtime(time_message)
+            local_hour = local_time.tm_hour
+            ic(local_hour)
+            if  21-7 <= local_hour or local_hour < 8-7:
+                text_to_send = 'Скорее всего вы оплатили ноты, но у нас сейчас немного поздно и увидем оплату мы' \
+                               'только когда проснёмся, но как только увидем, так сразу отправим вам ноты'
+                sticker_id = 13
+            else:
+                text_to_send = None
+                sticker_id = None
             admin_method = None
             message_to_admin = None
         else:
