@@ -1,10 +1,6 @@
 #!/usr/local/bin/python
-from bots_class.admin_bot import admin_bot
-from bots_class.client_bot import client_bot
 
-
-
-
+from bots_class.bots import client_bot, admin_bot
 
 
 def main():
