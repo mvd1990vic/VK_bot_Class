@@ -34,7 +34,7 @@ SCENARIOS = {
 Эти ноты стоят {price} ₽. Вы так же можете продолжить выбор товаров в каталоге маркета
 После оплаты напишите об этом сюда, ну а лучше скиньте скрин квитанции.''',
                 'failure_text': None,
-                'handler': ['price', 'sheets'],
+                'handler': ['price', 'sheets','sheets_id'],
                 'next_step': 'step2'
             },
             'step2': {
@@ -43,7 +43,7 @@ SCENARIOS = {
                 'sticker_id': None,
                 'text': 'Отлично эти ноты мы тоже зафиксировали. Итого к оплате поучается: {price} ₽',
                 'failure_text': None,
-                'handler': ['price', 'sheets'],
+                'handler': ['price', 'sheets','sheets_id'],
                 'next_step': 'step2'
             }
         }

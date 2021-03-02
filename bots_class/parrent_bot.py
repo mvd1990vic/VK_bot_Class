@@ -18,7 +18,7 @@ class Bot(threading.Thread):
         self.vk_session = vk_api.VkApi(token=main_token)  # Запуск ВК сессии при помощи токена API
         self.vk = self.vk_session.get_api()
         self.longpool = VkBotLongPoll(self.vk_session, self.group_id)
-        self.upload = VkUpload(self.vk_session)
+        self.upload = VkUpload(self.vk)
 
     def run(self):
         """

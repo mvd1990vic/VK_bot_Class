@@ -17,4 +17,9 @@ def sheets(event, context):
     sheet = event.attachments[0]['market']['title']
     context['sheets'].append(sheet)
 
+def sheets_id(event, context):
+    if 'sheets_id' not in context:
+        context['sheets_id'] = []
+    sheets_id = event.attachments[0]['market']['id']
+    context['sheets_id'].append(sheets_id)
 

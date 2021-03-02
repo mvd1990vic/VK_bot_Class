@@ -1,4 +1,5 @@
 #!/usr/local/bin/python
+import csv
 import time
 import re
 
@@ -137,7 +138,30 @@ class ClientBot(Bot):
         return text_to_send, sticker_id, admin_method, message_to_admin
 
     def upload_files(self, state):
-        ic('dfdfdfdf')
+        """
+        Подготовка к отправки файлов
+        @param state: строка из базы данных пользователей
+        @return:
+        """
+        sheets = dict(zip(state.context['sheets'],state.context['sheets_id']))
+        for sheet_name, sheet_id in sheets.items():
+            self.send_files(sheet_id, sheet_name, state)
+
+
+        self.send_message(user_id=state.user_id, text='Приятного разучивания!!!')
+
+    def send_files(self, sheet_id, sheet_name, state):
+        with open('databases/sheets_info.csv', 'r', newline='', encoding='utf-8') as csv_file:
+            csv_data = csv.DictReader(csv_file)
+            for row in csv_data:
+                ic(row['sheets_id'], sheet_id)
+                if row['sheets_id'] == str(sheet_id):
+                    sheets_file = f'files/{row["sheets_file"]}'
+                    file = self.upload.document_message(doc=sheets_file, title=sheet_name, tags='sheet',
+                                                        peer_id=state.user_id)
+
+                    name_file = f'doc{file["doc"]["owner_id"]}_{file["doc"]["id"]}'
+                    self.send_message(user_id=state.user_id, attachment=name_file, text=None)
 
     def continue_scenario_market(self, event, state_user, step, steps):
         if event.attachments:
