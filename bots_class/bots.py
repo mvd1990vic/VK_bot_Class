@@ -326,7 +326,8 @@ class AdminBot(Bot, EventContentHandler):
         text = f'Пользователь: [id{user_id}|{fullname}] захотел ноты:\n ' \
                f'***  {product_name}  ***\n' \
                f'Ссылка на диалог: {self.dialog_url}{user_id}\n'
-        self.send_message(user_id=self.admin_id, text=text)
+        for id in self.admin_id:
+            self.send_message(user_id=id, text=text)
         # Этот метод отправляет экземпляр маркета. пока посчитали такой вариант неудобным
         # self.send_message(user_id=self.admin_id, attachment=product_number, text=text)
 
