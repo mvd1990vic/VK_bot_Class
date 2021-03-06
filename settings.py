@@ -97,3 +97,5 @@ DB_CONFIG = dict(
 
 
 DEFAULT_ANSWER_ADMIN = 'Не знаю как на это ответить.'
+
+PURCASHE_MESSAGE = ['оплатил', 'оплатили', 'оплатила']

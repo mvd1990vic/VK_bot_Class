@@ -1,8 +1,9 @@
 import csv
-
+import os
 from collections import OrderedDict
 from icecream import ic
 from selenium import webdriver
+import difflib
 
 from private_settings import MARKET_URL
 
@@ -16,6 +17,25 @@ def csv_writer(list):
             writer = csv.DictWriter(out_file, delimiter=',', fieldnames=ordered_fieldnames)
             writer.writerow(product)
 
+def sheet_file(sheet_name):
+    """Функция сравнивает названия нот с названием файлов и записывет их в таблицу"""
+    print(sheet_name)
+    directory = 'files/'
+    files = os.listdir(directory)
+    file_name = ''
+    big_mather = 0
+    for file in files:
+        file = file.lower()
+        sheet_name = sheet_name.lower()
+        matcher = difflib.SequenceMatcher(None, file, sheet_name)
+        gr_d = 'green day - wake me up when september ends (piano cover).pdf'
+        if matcher.ratio() > big_mather and file != gr_d :
+            big_mather = matcher.ratio()
+            file_name = file
+
+    ic(file_name, big_mather )
+    return file_name
+
 def main():
     """Получение названия нот и уникального ID из маркета ВК"""
     driver = webdriver.Chrome()
@@ -27,7 +47,8 @@ def main():
         data = market_row_name.find_element_by_tag_name('a')
         sheet_name = data.text
         sheet_id = data.get_attribute('onclick')[-16:-9]
-        all_products.append({'sheets_name':sheet_name, 'sheets_id':sheet_id, 'sheets_file': None})
+        files = sheet_file(sheet_name=sheet_name)
+        all_products.append({'sheets_name':sheet_name, 'sheets_id':sheet_id, 'sheets_file': files})
     ic(all_products)
 
     csv_writer(list=all_products)

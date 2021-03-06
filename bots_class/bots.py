@@ -3,16 +3,10 @@ import csv
 import time
 import re
 
-
-
-
-
-from bots_class.parrent_bot import  EventContentHandler
+from bots_class.parrent_bot import EventContentHandler
 from databases.user_db import AdminState
 from private_settings import ADMIN_TOKEN, ADMIN_GROUP_ID, PEOPLE_ADMIN_ID, DIALOG_URL
-from settings import NO_SEND_MESSAGES, INTENTS_ADMINS, DEFAULT_ANSWER_ADMIN
-
-
+from settings import NO_SEND_MESSAGES, INTENTS_ADMINS, DEFAULT_ANSWER_ADMIN, PURCASHE_MESSAGE
 
 from icecream import ic
 from pony.orm import db_session
@@ -23,7 +17,6 @@ from bots_class.parrent_bot import Bot
 from databases.user_db import UserState
 from private_settings import MAIN_TOKEN, GROUP_ID
 from settings import INTENTS, SCENARIOS
-
 
 
 class ClientBot(Bot):
@@ -102,21 +95,19 @@ class ClientBot(Bot):
             handler = getattr(handlers, handler)
             handler(event=event, context=context)
 
-
         user_id = event.peer_id
         text_to_send = (step['text'].format(**context))
         sticker_id = step['sticker_id']
         admin_method = step['admin_method']
         message_to_admin = step['message_to_admin']
         new_id = None
-        for i in range(1,50):
+        for i in range(1, 50):
             find_id = UserState.get(id=str(i))
             if find_id:
                 pass
             else:
                 new_id = i
                 break
-
 
         UserState(id=new_id, user_id=str(user_id), scenario_name=scenario_name,
                   step_name=first_step, context=context)
@@ -143,10 +134,10 @@ class ClientBot(Bot):
         @param state: строка из базы данных пользователей
         @return:
         """
-        sheets = dict(zip(state.context['sheets'],state.context['sheets_id']))
+        sheets = dict(zip(state.context['sheets'], state.context['sheets_id']))
         for sheet_name, sheet_id in sheets.items():
             self.send_files(sheet_id, sheet_name, state)
-
+            time.sleep(2)
 
         self.send_message(user_id=state.user_id, text='Приятного разучивания!!!')
 
@@ -183,14 +174,14 @@ class ClientBot(Bot):
             else:
                 state_user.delete()
                 text_to_send = 'Конец сценария'
-        elif 'photo' in attachments:
-            time_message= event.date
+        elif 'photo' in attachments or event.text.lower() in PURCASHE_MESSAGE:
+            time_message = event.date
             local_time = time.gmtime(time_message)
             local_hour = local_time.tm_hour
             ic(local_hour)
-            if  21-7 <= local_hour or local_hour < 8-7:
-                text_to_send = 'Скорее всего вы оплатили ноты, но у нас сейчас немного поздно и увидем оплату мы' \
-                               'только когда проснёмся, но как только увидем, так сразу отправим вам ноты'
+            if 21 - 7 <= local_hour or local_hour < 8 - 7:
+                text_to_send = 'Скорее всего вы оплатили ноты, но у нас сейчас немного поздно и увидим оплату мы ' \
+                               'только когда проснёмся, но как только увидим, так сразу отправим вам ноты'
                 sticker_id = 13
             else:
                 text_to_send = None
@@ -217,7 +208,6 @@ class AdminBot(Bot, EventContentHandler):
         self.dialog_url = dialog_url
         self.admin_id = admin_id
         self.user_state = UserState
-
 
     @db_session
     def on_event(self, event):
@@ -246,17 +236,16 @@ class AdminBot(Bot, EventContentHandler):
         text_to_send = None
         sticker_id = None
 
-
-            # search intent
+        # search intent
         for intent in INTENTS_ADMINS:
 
-            if any (token in event.text.lower() for token in intent['tokens']):
+            if any(token in event.text.lower() for token in intent['tokens']):
                 # run intent
                 if intent['answer']:
                     text_to_send = intent['answer'] + self.intent_event(event=event, intent=intent)
                 # Пока в этой ветке сценарии не реалтзованны
-                #else:
-                    #text_to_send = self.start_scenario(user_id,intent['scenario'])
+                # else:
+                # text_to_send = self.start_scenario(user_id,intent['scenario'])
                 break
             else:
                 text_to_send = DEFAULT_ANSWER_ADMIN
@@ -267,12 +256,13 @@ class AdminBot(Bot, EventContentHandler):
         """Создание ответа для админа"""
         if intent['handler'] == 'user_line':
             all_user_line = []
-            for client in self.user_state.select(lambda x: x.id ):
+            for client in self.user_state.select(lambda x: x.id):
                 id = client.id
                 fullname = self.handler_content(user_id=client.user_id, get_content='fullname', vk=self.vk)
                 price = client.context['price']
-                sheets = ', '.join(client.context['sheets'])
-                user_line = f'{id} {fullname} {sheets} {price} руб. '
+                sheets_lens = len(client.context['sheets'])
+                sheets = ', \n'.join(client.context['sheets'])
+                user_line = f'{id} {fullname}\n {sheets} Итого: {sheets_lens} на {price} руб.\n\n'
 
                 all_user_line.append(user_line)
             all_user_line = '\n'.join(all_user_line)
@@ -283,7 +273,7 @@ class AdminBot(Bot, EventContentHandler):
             id_client = ''.join(id_client)
             state = UserState.get(id=str(id_client))
             client_bot.upload_files(state=state)
-            # TODO Потом удалить коммент state.delete()
+            state.delete()
 
             return ''
 
@@ -301,8 +291,6 @@ class AdminBot(Bot, EventContentHandler):
             state.delete()
             return ''
 
-
-
     def message_from_user(self, event):
         """Отправка сообщения от пользователя админам"""
         text_user = event.text
@@ -315,13 +303,12 @@ class AdminBot(Bot, EventContentHandler):
 
             self.send_message(user_id=self.admin_id, text=text)
 
-
     def product_from_user(self, event):
         """Отправка товаров от пользователя"""
-        product_name = self.handler_content(event=event,get_content='product_name')
-        product_number = self.handler_content(event=event,get_content='product_number')
-        fullname = self.handler_content(event=event,get_content='fullname', vk=self.vk )
-        user_id = self.handler_content(event=event,get_content='user_id')
+        product_name = self.handler_content(event=event, get_content='product_name')
+        product_number = self.handler_content(event=event, get_content='product_number')
+        fullname = self.handler_content(event=event, get_content='fullname', vk=self.vk)
+        user_id = self.handler_content(event=event, get_content='user_id')
 
         text = f'Пользователь: [id{user_id}|{fullname}] захотел ноты:\n ' \
                f'***  {product_name}  ***\n' \
@@ -333,18 +320,14 @@ class AdminBot(Bot, EventContentHandler):
 
     def photo_from_user(self, event):
         """Отправка фото от пользователя"""
-        photo_number = self.handler_content(event=event,get_content='photo_number')
+        photo_number = self.handler_content(event=event, get_content='photo_number')
 
         fullname = self.handler_content(event=event, get_content='fullname', vk=self.vk)
         user_id = self.handler_content(event=event, get_content='user_id')
         text = f'Пользователь: [id{user_id}|{fullname}] отправил фотографию:\n' \
                f'Ссылка на диалог: {self.dialog_url}{user_id}'
 
-
         self.send_message(user_id=self.admin_id, attachment=photo_number, text=text)
-
-
-
 
 
 admin_bot = AdminBot(main_token=ADMIN_TOKEN, group_id=ADMIN_GROUP_ID, admin_id=PEOPLE_ADMIN_ID, dialog_url=DIALOG_URL)
