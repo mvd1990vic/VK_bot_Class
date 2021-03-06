@@ -148,6 +148,8 @@ class ClientBot(Bot):
                 ic(row['sheets_id'], sheet_id)
                 if row['sheets_id'] == str(sheet_id):
                     sheets_file = f'files/{row["sheets_file"]}'
+                    with open(sheets_file) as fi:
+                        print(fi)
                     file = self.upload.document_message(doc=sheets_file, title=sheet_name, tags='sheet',
                                                         peer_id=state.user_id)
 
@@ -313,8 +315,7 @@ class AdminBot(Bot, EventContentHandler):
         text = f'Пользователь: [id{user_id}|{fullname}] захотел ноты:\n ' \
                f'***  {product_name}  ***\n' \
                f'Ссылка на диалог: {self.dialog_url}{user_id}\n'
-        for id in self.admin_id:
-            self.send_message(user_id=id, text=text)
+        self.send_message(user_id=self.admin_id, text=text)
         # Этот метод отправляет экземпляр маркета. пока посчитали такой вариант неудобным
         # self.send_message(user_id=self.admin_id, attachment=product_number, text=text)
 

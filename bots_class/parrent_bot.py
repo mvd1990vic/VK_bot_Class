@@ -32,14 +32,22 @@ class Bot(threading.Thread):
             try:
                 self.on_event(event)
             except Exception as exc:
-               print('Ошибка в обработке: ', exc )
+                print('Ошибка в обработке: ', exc )
 
     def send_message(self, user_id, text, sticker_id=None, attachment=None):
         """Отправка сообщений от бота"""
-        self.vk.messages.send(user_id=user_id, message=text, attachment=attachment, random_id=0)
-        # Отправка стикера
-        if sticker_id:
-            self.vk.messages.send(user_id=user_id, sticker_id=sticker_id, random_id=0)
+
+        if isinstance(user_id, list):
+            for id in user_id:
+                self.vk.messages.send(user_id=id, message=text, attachment=attachment, random_id=0)
+                # Отправка стикера
+                if sticker_id:
+                    self.vk.messages.send(user_id=id, sticker_id=sticker_id, random_id=0)
+        else:
+            self.vk.messages.send(user_id=user_id, message=text, attachment=attachment, random_id=0)
+            # Отправка стикера
+            if sticker_id:
+                self.vk.messages.send(user_id=user_id, sticker_id=sticker_id, random_id=0)
 
 
 
