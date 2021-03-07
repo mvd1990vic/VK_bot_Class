@@ -4,7 +4,7 @@ import time
 import re
 
 from bots_class.parrent_bot import EventContentHandler
-from databases.user_db import AdminState
+from databases.user_db import AdminState, AllUser
 from private_settings import ADMIN_TOKEN, ADMIN_GROUP_ID, PEOPLE_ADMIN_ID, DIALOG_URL
 from settings import NO_SEND_MESSAGES, INTENTS_ADMINS, DEFAULT_ANSWER_ADMIN, PURCASHE_MESSAGE
 
@@ -19,7 +19,7 @@ from private_settings import MAIN_TOKEN, GROUP_ID
 from settings import INTENTS, SCENARIOS
 
 
-class ClientBot(Bot):
+class ClientBot(Bot, EventContentHandler):
     """
     Бот для работы с клиентами сообщества. Отправляет клиентам реквизиты, переправляет их сообщения боту-админу, по
     возможности отправляет им ноты, подсчитивает сколько надо заптатить за ноты и т.д.
@@ -54,6 +54,9 @@ class ClientBot(Bot):
         user_id = event.peer_id
         text_to_send = None
         sticker_id = None
+        user_name = self.handler_content(get_content='fullname', vk=self.vk, user_id=user_id)
+        AllUser(user_id=str(user_id), user_name=user_name)
+
         if event.attachments:
             attachments = event.attachments[0]
         else:
@@ -96,6 +99,7 @@ class ClientBot(Bot):
             handler(event=event, context=context)
 
         user_id = event.peer_id
+
         text_to_send = (step['text'].format(**context))
         sticker_id = step['sticker_id']
         admin_method = step['admin_method']
@@ -111,6 +115,7 @@ class ClientBot(Bot):
 
         UserState(id=new_id, user_id=str(user_id), scenario_name=scenario_name,
                   step_name=first_step, context=context)
+
         admin_bot.product_from_user(event)
         return text_to_send, sticker_id, admin_method, message_to_admin
 
