@@ -54,8 +54,12 @@ class ClientBot(Bot, EventContentHandler):
         user_id = event.peer_id
         text_to_send = None
         sticker_id = None
-        user_name = self.handler_content(get_content='fullname', vk=self.vk, user_id=user_id)
-        AllUser(user_id=str(user_id), user_name=user_name)
+        state_all_users = AllUser.get(user_id=str(user_id))
+        if state_all_users:
+            pass
+        else:
+            user_name = self.handler_content(get_content='fullname', vk=self.vk, user_id=user_id)
+            AllUser(user_id=str(user_id), user_name=user_name)
 
         if event.attachments:
             attachments = event.attachments[0]
