@@ -1,6 +1,8 @@
 import csv
 import os
 from collections import OrderedDict
+from time import sleep
+
 from icecream import ic
 from selenium import webdriver
 import difflib
@@ -25,11 +27,11 @@ def sheet_file(sheet_name):
     file_name = ''
     big_mather = 0
     for file in files:
-        file = file.lower()
+        file_low = file.lower()
         sheet_name = sheet_name.lower()
-        matcher = difflib.SequenceMatcher(None, file, sheet_name)
+        matcher = difflib.SequenceMatcher(None, file_low, sheet_name)
         gr_d = 'green day - wake me up when september ends (piano cover).pdf'
-        if matcher.ratio() > big_mather and file != gr_d :
+        if matcher.ratio() > big_mather and file_low != gr_d :
             big_mather = matcher.ratio()
             file_name = file
 
@@ -40,8 +42,13 @@ def main():
     """Получение названия нот и уникального ID из маркета ВК"""
     driver = webdriver.Chrome()
     driver.get(MARKET_URL)
+    sleep(10)
+
+
+
     title_market= driver.find_elements_by_class_name('market_row')
     all_products = []
+    ic(len(title_market))
     for market in title_market:
         market_row_name = market.find_element_by_class_name('market_row_name')
         data = market_row_name.find_element_by_tag_name('a')
