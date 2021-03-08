@@ -37,6 +37,7 @@ class Bot(threading.Thread):
                 time.sleep(5)
             except Exception as exc:
                 print('Ошибка в обработке: ', exc )
+                time.sleep(5)
 
 
     def send_message(self, user_id, text, sticker_id=None, attachment=None):

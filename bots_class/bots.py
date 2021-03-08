@@ -155,7 +155,7 @@ class ClientBot(Bot, EventContentHandler):
             csv_data = csv.DictReader(csv_file)
             for row in csv_data:
                 ic(row['sheets_id'], sheet_id)
-                if row['sheets_id'] == str(sheet_id):
+                if int(row['sheets_id']) == (sheet_id):
                     sheets_file = f'files/{row["sheets_file"]}'
                     with open(sheets_file) as fi:
                         print(fi)
