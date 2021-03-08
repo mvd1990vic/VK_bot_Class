@@ -1,9 +1,10 @@
 #!/usr/local/bin/python
 import threading
-
+import time
 from icecream import ic
 from vk_api import vk_api, VkUpload
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
+import requests
 
 
 class Bot(threading.Thread):
@@ -27,12 +28,16 @@ class Bot(threading.Thread):
         Так же вызов on_event обвёрнут в try/except что бы работа бота не прикращалась.
         """
         print('Работа бота началась:')
-
-        for event in self.longpool.listen():
+        while True:
             try:
-                self.on_event(event)
+                for event in self.longpool.listen():
+                    self.on_event(event)
+            except requests.exceptions.ReadTimeout:
+                print("\n Переподключение к серверам ВК \n")
+                time.sleep(5)
             except Exception as exc:
                 print('Ошибка в обработке: ', exc )
+
 
     def send_message(self, user_id, text, sticker_id=None, attachment=None):
         """Отправка сообщений от бота"""
