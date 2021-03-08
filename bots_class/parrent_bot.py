@@ -18,7 +18,7 @@ class Bot(threading.Thread):
         self.group_id = group_id  # id группы передаётся из файла settings.py
         self.vk_session = vk_api.VkApi(token=main_token)  # Запуск ВК сессии при помощи токена API
         self.vk = self.vk_session.get_api()
-        self.longpool = VkBotLongPoll(self.vk_session, self.group_id)
+        self.longpool = None
         self.upload = VkUpload(self.vk)
 
     def run(self):
@@ -27,9 +27,11 @@ class Bot(threading.Thread):
         Если состоялось событие, то вызываем метод on_event из дочернего класса client_bot.
         Так же вызов on_event обвёрнут в try/except что бы работа бота не прикращалась.
         """
-        print('Работа бота началась:')
+
         while True:
             try:
+                self.longpool = VkBotLongPoll(self.vk_session, self.group_id)
+                print('Работа бота началась:')
                 for event in self.longpool.listen():
                     self.on_event(event)
             except requests.exceptions.ReadTimeout:
