@@ -3,4 +3,5 @@
 /databases/bot.db
 /private_settings.py
 /files/
+/__pycache__
 /chromedriver.exe
