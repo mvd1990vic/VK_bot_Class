@@ -34,7 +34,7 @@ class Bot(threading.Thread):
                 print('Работа бота началась:')
                 for event in self.longpool.listen():
                     self.on_event(event)
-            except requests.exceptions.ReadTimeout:
+            except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
                 print("\n Переподключение к серверам ВК \n")
                 time.sleep(5)
             except Exception as exc:
