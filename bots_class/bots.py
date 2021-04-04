@@ -185,14 +185,14 @@ class ClientBot(Bot, EventContentHandler):
             else:
                 state_user.delete()
                 text_to_send = 'Конец сценария'
-        elif 'photo' in attachments or event.text.lower() in PURCASHE_MESSAGE:
+        elif 'photo' or 'doc' in attachments or event.text.lower() in PURCASHE_MESSAGE:
             time_message = event.date
             local_time = time.gmtime(time_message)
             local_hour = local_time.tm_hour
             ic(local_hour)
             if 21 - 7 <= local_hour or local_hour < 8 - 7:
                 text_to_send = 'Скорее всего вы оплатили ноты, но у нас сейчас немного поздно и увидим оплату мы ' \
-                               'только когда проснёмся, но как только увидим, так сразу отправим вам ноты'
+                               'только когда проснёмся, но как только увидим, так сразу отправим вам ноты\nС уважением, **БОТ СООБЩЕСТВА**.'
                 sticker_id = 13
             else:
                 text_to_send = None
