@@ -185,7 +185,7 @@ class ClientBot(Bot, EventContentHandler):
             else:
                 state_user.delete()
                 text_to_send = 'Конец сценария'
-        elif 'photo' or 'doc' in attachments or event.text.lower() in PURCASHE_MESSAGE:
+        elif 'photo' or 'doc' in attachments or PURCASHE_MESSAGE  in event.text.lower():
             time_message = event.date
             local_time = time.gmtime(time_message)
             local_hour = local_time.tm_hour
