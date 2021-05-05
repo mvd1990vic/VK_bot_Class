@@ -159,7 +159,7 @@ class ClientBot(Bot, EventContentHandler):
                     sheets_file = f'files/{row["sheets_file"]}'
                     with open(sheets_file) as fi:
                         print(fi)
-                    file = self.upload.document_message(doc=sheets_file, title=sheet_name, tags='sheet',
+                    file = self.upload.document_message(doc=sheets_file, title=row['sheets_file'], tags='sheet',
                                                         peer_id=state.user_id)
 
                     name_file = f'doc{file["doc"]["owner_id"]}_{file["doc"]["id"]}'
@@ -185,7 +185,7 @@ class ClientBot(Bot, EventContentHandler):
             else:
                 state_user.delete()
                 text_to_send = 'Конец сценария'
-        elif 'photo' or 'doc' in attachments or PURCASHE_MESSAGE  in event.text.lower():
+        elif 'photo' in attachments or 'doc' in attachments or event.text.lower()  in PURCASHE_MESSAGE:
             time_message = event.date
             local_time = time.gmtime(time_message)
             local_hour = local_time.tm_hour
